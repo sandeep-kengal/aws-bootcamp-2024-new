@@ -1,0 +1,4 @@
+__pycache__/
+sample\ SG\ definition.txt
+frontend-react-js/build/*
+*.env

@@ -1,0 +1,61 @@
+tasks:
+  # Install the AWS CLI v2
+  - name: aws-cli
+    env:
+      AWS_CLI_AUTO_PROMPT: on-partial
+    before: |
+      cd /workspace
+      curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+      unzip awscliv2.zip
+      sudo ./aws/install
+      cd $THEIA_WORKSPACE_ROOT
+
+#PostGreSQL is the database we will use for the bootcamp. This is the code to install the client.
+  - name: postgres
+    before: |
+      curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc|sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/postgresql.gpg
+      echo "deb http://apt.postgresql.org/pub/repos/apt/ `lsb_release -cs`-pgdg main" |sudo tee  /etc/apt/sources.list.d/pgdg.list
+      sudo apt update
+      sudo apt install -y postgresql-client-13 libpq-dev
+    #Automatically setting the Gitpod IP and exporting it
+    command: |
+      export GITPOD_IP=$(curl ifconfig.me)
+      source "$THEIA_WORKSPACE_ROOT/bin/rds/update-sg-rule"
+#Automating the running of npm to each time the container is started.
+  - name: react-js
+    before: |
+      cd frontend-react-js
+      npm i
+  - name: flask
+    before: |
+      cd backend-flask
+      pip install -r requirements.txt 
+  - name: fargate
+    before: |
+      curl "https://s3.amazonaws.com/session-manager-downloads/plugin/latest/ubuntu_64bit/session-manager-plugin.deb" -o "session-manager-plugin.deb"
+      sudo dpkg -i session-manager-plugin.deb
+      cd backend-flask
+#Momento
+  # - name: momento
+  #   before: |
+  #     brew tap momentohq/tap
+  #     brew install momento-cli
+  
+vscode:
+  extensions:
+    - 42Crunch.vscode-openapi
+    # Install the PostgreSQL Client extension for Visual Studio Code
+    - cweijan.vscode-postgresql-client2
+
+ports:
+  - name: frontend
+    port: 3000
+    onOpen: open-browser
+    visibility: public
+  - name: backend
+    port: 4567
+    visibility: public
+# Xray daemon port
+  - name: xray-daemon
+    port: 2000
+    visibility: public
